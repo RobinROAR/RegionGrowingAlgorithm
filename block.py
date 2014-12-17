@@ -41,10 +41,10 @@ class Block:
 if __name__ == "__main__":
 	import Image,time
 	
-	b1 = Block((0,0),50)
-	b2 = Block((13,13),2)
-	print b1.a,b1.d,b1.width,b1.pn
-	print b1.testConnectivity(b2)
+	#~ b1 = Block((0,0),50)
+	#~ b2 = Block((13,13),2)
+	#~ print b1.a,b1.d,b1.width,b1.pn
+	#~ print b1.testConnectivity(b2)
 	
 	
 	image = Image.open('image/monkey.jpg') 
@@ -53,23 +53,34 @@ if __name__ == "__main__":
 	
 	#求宽度
 	hig = mat.shape[0]
-	wid = mag.shape[1]
-	if(hig > =wid):
-		if(wid%2 = 0):
+	wid = mat.shape[1]
+	if(hig >=wid):
+		if(wid%2 == 0):
 			width = wid
 		else:
 			width = wid-1
 	else:
-		if(hig%2 = 0):
+		if(hig%2 == 0):
 			width = hig
 		else:
 			width = hig-1
 	
 	#第一次划分
-	width
+	n=2
+	bw = width / n
+	point = [0,0]
+	L = []
+	for i in range(n):
+		for j in range(n):
+			btemp = Block(point,bw)
+			L.append(btemp)
+			for i in L:
+				print i.a
+			print '____________'
+			point[1] +=bw
+		point[0]+=bw
+		point[1] =0
 	
-	print mat.shape
+
 	
-	
-	print b1.scoreVar(mat)
 		
