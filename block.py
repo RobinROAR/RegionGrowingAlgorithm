@@ -2,6 +2,7 @@
 #@Cnic 2014.12.27
 #反向块增长
 import numpy as np
+import time
 
 #自定义类--
 class Block:
@@ -38,11 +39,25 @@ class Block:
 			y = 0
 		L = np.array(L)
 		return np.var(L)
-			
+	
+	def scoreMean(self,mat):
+		'''评价函数2 ： 均值'''
+		L = []
+		x = self.a[0]
+		y = self.a[1]
+		for i in range(self.width):
+			for j in range(self.width):
+				L.append(mat[x,y])
+				y+=1
+			x+=1
+			y = 0
+		L = np.array(L)
+		return np.mean(L)
 
 #自定义方法-暂时放在一起
 def 	findBiggestSubset(L1):
 	'''返回最大联通子集'''
+	st = time.time()
 	maxsubset = []
 	sum = 0
 	for i in L1:
@@ -69,12 +84,17 @@ def 	findBiggestSubset(L1):
 		if len(result)>sum:
 			sum = len(result)
 			maxsubset = result
+			
+	et = time.time()
+	print 'findBiggestSubset() time: '+ str(et-st)+'  s'
 	return maxsubset
 
 
-def markBlock(list,mat):
+def markBlock(list,mat,result):
 	'''根据返回的最大子集标记点'''
-	result= []
+	st = time.time()
+	
+	print 'mark ',len(list),' Block'
 	hig = mat.shape[0]
 	wid = mat.shape[1]
 	for i in range(hig):
@@ -83,14 +103,14 @@ def markBlock(list,mat):
 			#x = list[0]
 				if i>=x.a[0] and i<=x.d[0] and j >= x.a[1] and j <=x.d[1] and (i,j) not in result:
 					result.append((i,j))
+	et = time.time()
+	print 'markBlock() time: '+ str(et-st)+'  s'	
 	return result
 				
-def redraw(result,mat):
+def redraw(result,mat,name):
 	'''根据标记节点重新画图'''
-	#矩阵和图像的坐标位相反
-	
-	
 	st = time.time()
+	#矩阵和图像的坐标位相反
 	putpixel = image.im.putpixel   
 	for i in range(mat.shape[0]):
 		for j in range(mat.shape[1]):
@@ -100,18 +120,21 @@ def redraw(result,mat):
 		putpixel( j ,150)
 				
 		
-	output = "new1"
+	output = name
 	image.thumbnail( (image.size[0], image.size[1] ), Image.ANTIALIAS )
 	image.save(output + ".JPEG","JPEG")
 
 	print image.size[0]*image.size[1]
 	print image.size[0],image.size[1]
-		
-	et = time.time();
-	print 'It took '+ str(et-st)+'  s'
 	
-def  blockDividing(n,mat):
+	et = time.time()
+	print 'redraw() time: '+ str(et-st)+'  s'
+		
+	
+	
+def  blockInit(n,mat):
 	'''基本的块增长算法'''
+	st = time.time()
 	#求宽度
 	hig = mat.shape[0]
 	wid = mat.shape[1]
@@ -126,7 +149,6 @@ def  blockDividing(n,mat):
 			width = hig
 		else:
 			width = hig-1
-	
 	#第一次划分
 	bw = width / n
 	x=0
@@ -141,30 +163,57 @@ def  blockDividing(n,mat):
 			y+=bw
 		x+=bw
 		y =0
+		
+	et = time.time()
+	print 'blockInit() time: '+ str(et-st)+'  s'
 	return L
-
-def  judgeBlock(L):
-	'''通过判定函数筛选结果'''
-	for i in L:
-		#if i.scoreVar(mat)>=270 and i.scoreVar(mat)<387:
-		if i.scoreVar(mat)>=200:
-			i.flag = 1
 	
+#~ def  blockDividing(n,L):
+	#~ result=[]
+	#~ width = 0
+	#~ for i in L:
+		#~ if (i.b[0]-i.a[0])%2 == 0:
+			#~ width = (i.b[0]-i.a[0])/2
+			#~ L.append
+		#~ else:
+			
+			
+	
+
+def  judgeBlock(L,n):
+	'''通过判定函数筛选结果'''
+	st = time.time()
+	if n<=5:
+		for i in L:
+			#if i.scoreVar(mat)>=270 and i.scoreVar(mat)<387:
+			if i.scoreVar(mat)<387:
+				i.flag = 1
+	
+	if n <=10 and n>5:
+		for i in L:
+			#if i.scoreVar(mat)>=270 and i.scoreVar(mat)<387:
+			if i.scoreVar(mat)>50:
+				i.flag = 1
 	#打印结果
 	L1 = []
 	for i in L:
 		if i.flag ==1:
-			print i.num
-			print i.scoreVar(mat)
+			#~ print i.num
+			#~ print i.scoreVar(mat)
 			L1.append(i)
+			
+	et = time.time();
+	print 'judgeBlock time: '+ str(et-st)+'  s'
 	return L1
 	
 	
-def  BlockGrowing(result,mat,n):
+def  blockGrowing(result,mat,n):
 	'''缩小窗口宽度，环绕增长'''
-	L = blockDividing(n,mat)
-	L1 = judgeBlock(L)
-	L3 = []
+	st = time.time()
+	L = blockInit(n,mat)
+	L1 = judgeBlock(L,n)
+	
+	L2 = []
 	for i in L1: 
 		cnt = 0
 		if i.a in result:
@@ -176,8 +225,12 @@ def  BlockGrowing(result,mat,n):
 		if i.d in result:
 			cnt+=1
 		if cnt >0 and cnt < 4:
-			L3.append(i)
-	return L3
+			L2.append(i)
+			print i.num
+	
+	et = time.time();
+	print 'blockGrowing time: '+ str(et-st)+'  s'
+	return L2
 			
 		
 		
@@ -186,26 +239,31 @@ def  BlockGrowing(result,mat,n):
 if __name__ == "__main__":
 	from PIL import Image
 	import time
-	
+		
+	st = time.time()
+
 	#转换称灰度图，转成矩阵
 	image = Image.open('image/monkey.jpg') 
 	mat = np.array(image.convert("L"),'f')	
 	
-	L = blockDividing(4,mat)
-	L1 = judgeBlock(L)
+	print mat
 	
-	#~ print "***************************"
+	L = blockInit(4,mat)
+	L1 = judgeBlock(L,4)
+	
+	print "***************************"
+	s = findBiggestSubset(L1)
+	s1 = []
+	s1 = markBlock(s,mat,s1)
+	redraw(s1,mat,'new1')
 	
 	
-	#~ s = findBiggestSubset(L1)
+	L2 = blockGrowing(s1,mat,8)
+	while(len(L2)!=0):
+		s1 = markBlock(L2,mat,s1)
+		L2 = blockGrowing(s1,mat,8)
 	
-	#~ for i in s:
-		#~ print i.num
-	#~ s1 = markBlock(s,mat)
-	#~ redraw(s1,mat)
+	redraw(s1,mat,'new2')
 
-		
-	
-					
-					
-					
+	et = time.time();
+	print 'It took '+ str(et-st)+'  s'
